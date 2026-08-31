@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¿Quién Soy? — Juego online</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap');
+
+  :root{
+    --bg: #1B1035;
+    --bg-2: #241547;
+    --card: #2A1B4D;
+    --card-2: #35225E;
+    --gold: #FFC857;
+    --pink: #FF5D8F;
+    --mint: #3FE0C5;
+    --ink: #F5F0FF;
+    --ink-dim: #B9AEDC;
+    --line: rgba(245,240,255,0.12);
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family: 'Space Grotesk', sans-serif;
+    background:
+      radial-gradient(circle at 15% 8%, rgba(255,93,143,0.18), transparent 45%),
+      radial-gradient(circle at 85% 92%, rgba(63,224,197,0.14), transparent 45%),
+      var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  #app{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 18px 60px;
+  }
+  .wrap{ width:100%; max-width: 460px; }
+
+  h1.brand{
+    font-family:'Fredoka', sans-serif;
+    font-weight:700;
+    font-size: 32px;
+    text-align:center;
+    margin: 4px 0 2px;
+    letter-spacing: -0.5px;
+  }
+  h1.brand span{ color: var(--pink); }
+  .tagline{
+    text-align:center;
+    color: var(--ink-dim);
+    font-size: 14.5px;
+    margin: 0 0 28px;
+    line-height:1.5;
+  }
+  .card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
+  }
+  label{ display:block; font-size: 13px; color: var(--ink-dim); margin-bottom: 7px; }
+  input[type=text]{
+    width: 100%;
+    background: var(--bg-2);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 13px 14px;
+    color: var(--ink);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  input[type=text]:focus{ border-color: var(--pink); }
+  input[type=text]::placeholder{ color: #6E5F9E; }
+  .field{ margin-bottom: 16px; }
+  .field:last-child{ margin-bottom: 0; }
+  button{
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-size: 16.5px;
+    cursor: pointer;
+    width: 100%;
+    transition: transform .08s ease, filter .15s;
+  }
+  button:active{ transform: scale(0.97); }
+  button:disabled{ opacity:0.45; cursor:not-allowed; }
+  .btn-primary{ background: var(--pink); color: #2A0E1E; }
+  .btn-primary:hover{ filter: brightness(1.08); }
+  .btn-gold{ background: var(--gold); color: #3A2600; }
+  .btn-mint{ background: var(--mint); color: #063A32; }
+  .btn-ghost{ background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+  .btn-ghost:hover{ border-color: var(--ink-dim); }
+  .btn-danger{ background: transparent; color: var(--pink); border: 1.5px solid rgba(255,93,143,0.4); }
+  .divider{ display:flex; align-items:center; gap: 12px; color: var(--ink-dim); font-size: 13px; margin: 20px 0; }
+  .divider::before, .divider::after{ content:''; flex:1; height:1px; background: var(--line); }
+  .error{ color: var(--pink); font-size: 13.5px; margin-top: 10px; text-align:center; }
+  .code-pill{
+    display:inline-block;
+    font-family:'Fredoka',sans-serif;
+    font-weight:700;
+    font-size: 26px;
+    letter-spacing: 4px;
+    background: var(--bg-2);
+    border: 1.5px dashed var(--gold);
+    color: var(--gold);
+    border-radius: 14px;
+    padding: 10px 18px;
+  }
+  .center{ text-align:center; }
+  .muted{ color: var(--ink-dim); font-size: 13.5px; }
+  .players-list{ list-style:none; margin: 0; padding: 0; }
+  .players-list li{ display:flex; align-items:center; gap:10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+  .players-list li:last-child{ border-bottom:none; }
+  .avatar{ width:30px; height:30px; border-radius: 50%; background: var(--card-2); display:flex; align-items:center; justify-content:center; font-family:'Fredoka',sans-serif; font-weight:600; font-size:13px; color: var(--gold); flex-shrink:0; }
+  .host-tag{ margin-left:auto; font-size:11px; color: var(--bg); background: var(--gold); padding: 3px 8px; border-radius: 999px; font-family:'Fredoka',sans-serif; font-weight:600; }
+  .offline-tag{ margin-left:auto; font-size:11px; color: var(--ink-dim); }
+  .score-tag{ margin-left:auto; font-size: 13px; color: var(--mint); font-family:'Fredoka',sans-serif; font-weight:600; }
+  .theme-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .theme-opt{ border: 1.5px solid var(--line); background: var(--bg-2); border-radius: 14px; padding: 13px 10px; text-align:center; cursor:pointer; font-size: 13.5px; transition: border-color .15s, background .15s; }
+  .theme-opt.active{ border-color: var(--pink); background: rgba(255,93,143,0.12); }
+  .theme-opt .emoji{ font-size: 22px; display:block; margin-bottom:4px; }
+  textarea{ width:100%; background: var(--bg-2); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; color: var(--ink); font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; min-height: 80px; resize: vertical; outline:none; }
+  textarea:focus{ border-color: var(--pink); }
+  .stage{ text-align:center; padding: 40px 20px; border-radius: 22px; margin-bottom: 16px; position:relative; overflow:hidden; }
+  .stage.hidden-role{ background: linear-gradient(160deg, var(--card-2), var(--card)); border: 1.5px solid var(--line); }
+  .stage.shown-role{ background: linear-gradient(160deg, #3a2166, #4a1f4e); border: 1.5px solid rgba(255,200,87,0.35); }
+  .stage .eyebrow{ font-size: 13px; color: var(--ink-dim); margin-bottom: 14px; }
+  .stage .word{ font-family:'Fredoka', sans-serif; font-weight: 700; font-size: 34px; line-height:1.15; word-break: break-word; }
+  .stage .word.big-q{ font-size: 64px; color: var(--ink-dim); }
+  .stage .hint{ margin-top: 16px; font-size: 13.5px; color: var(--ink-dim); }
+  .turn-banner{ text-align:center; font-size: 14.5px; color: var(--ink-dim); margin-bottom: 14px; }
+  .turn-banner b{ color: var(--gold); }
+  .controls-stack > *{ margin-bottom: 10px; }
+  .controls-stack > *:last-child{ margin-bottom:0; }
+  .scoreboard-title{ font-family:'Fredoka',sans-serif; font-weight:600; font-size: 15px; margin-bottom: 10px; color: var(--ink-dim); }
+  .toast{ position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: var(--card-2); border: 1px solid var(--line); color: var(--ink); padding: 11px 18px; border-radius: 999px; font-size: 13.5px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6); opacity:0; pointer-events:none; transition: opacity .25s, transform .25s; z-index: 50; }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(-6px); }
+  .link-row{ display:flex; align-items:center; justify-content:space-between; margin-top: 4px; }
+  .link-row .fake-a{ color: var(--ink-dim); font-size: 13px; cursor:pointer; text-decoration: underline; }
+  .spinner{ width:16px;height:16px; border: 2px solid rgba(255,255,255,0.25); border-top-color: var(--ink); border-radius:50%; display:inline-block; animation: spin .7s linear infinite; vertical-align: -3px; margin-right:8px; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .conn-banner{ text-align:center; font-size:12.5px; color: var(--ink-dim); margin-bottom: 14px; }
+  .conn-banner.bad{ color: var(--pink); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+(function(){
+  const socket = io();
+
+  // Theme metadata (words themselves live server-side)
+  let THEME_META = {};
+
+  const app = document.getElementById('app');
+  let room = null;
+  let myId = null;
+  let joinErr = '';
+  let busy = false;
+  let connected = socket.connected;
+
+  function uid(){ return Math.random().toString(36).slice(2,9); }
+
+  function toast(msg){
+    let t = document.getElementById('__toast');
+    if(!t){
+      t = document.createElement('div');
+      t.id = '__toast';
+      t.className = 'toast';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._h);
+    t._h = setTimeout(()=> t.classList.remove('show'), 1800);
+  }
+
+  function saveSession(){
+    try{
+      localStorage.setItem('quiensoy-session', JSON.stringify({ code: room.code, playerId: myId }));
+    }catch(e){}
+  }
+  function clearSession(){
+    try{ localStorage.removeItem('quiensoy-session'); }catch(e){}
+  }
+  function tryRejoin(){
+    let saved = null;
+    try{ saved = JSON.parse(localStorage.getItem('quiensoy-session') || 'null'); }catch(e){}
+    if(!saved) return;
+    socket.emit('rejoin-room', saved, (res)=>{
+      if(res && res.ok){
+        room = res.room;
+        myId = saved.playerId;
+        render();
+      } else {
+        clearSession();
+      }
+    });
+  }
+
+  socket.on('connect', ()=>{
+    connected = true;
+    if(!room) tryRejoin();
+    render();
+  });
+  socket.on('disconnect', ()=>{ connected = false; render(); });
+  socket.on('room-update', (r)=>{
+    if(room && r.code === room.code){
+      room = r;
+      render();
+    }
+  });
+
+  socket.emit('get-themes', {}, (meta)=>{ THEME_META = meta || {}; if(!room) render(); });
+
+  // ---------- Actions ----------
+  function createRoom(name){
+    busy = true; render();
+    socket.emit('create-room', { name }, (res)=>{
+      busy = false;
+      if(res && res.ok){
+        room = res.room;
+        myId = res.playerId;
+        saveSession();
+      } else {
+        toast('No se pudo crear la sala, intenta de nuevo');
+      }
+      render();
+    });
+  }
+
+  function joinRoom(code, name){
+    busy = true; joinErr=''; render();
+    socket.emit('join-room', { code, name }, (res)=>{
+      busy = false;
+      if(res && res.ok){
+        room = res.room;
+        myId = res.playerId;
+        saveSession();
+      } else {
+        joinErr = (res && res.error) || 'No se pudo unir a la sala.';
+      }
+      render();
+    });
+  }
+
+  function setTheme(key){
+    if(myId !== room.hostId) return;
+    socket.emit('set-theme', { code: room.code, themeKey: key });
+  }
+  function addCustomWords(text){
+    if(!text.trim()) return;
+    socket.emit('add-words', { code: room.code, text });
+    toast('Palabras agregadas ✨');
+  }
+  function startGame(){
+    if(myId !== room.hostId) return;
+    if(room.players.length < 2){ toast('Necesitas al menos 2 jugadores'); return; }
+    socket.emit('start-game', { code: room.code });
+  }
+  function correctGuess(){ socket.emit('correct-guess', { code: room.code }); }
+  function passTurn(){ socket.emit('pass-turn', { code: room.code }); }
+  function endGame(){ if(myId === room.hostId) socket.emit('end-game', { code: room.code }); }
+  function leaveRoom(){
+    clearSession();
+    room = null; myId = null;
+    render();
+  }
+
+  // ---------- DOM helpers ----------
+  function h(tag, attrs, ...children){
+    const el = document.createElement(tag);
+    if(attrs){
+      Object.entries(attrs).forEach(([k,v])=>{
+        if(k === 'class') el.className = v;
+        else if(k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2), v);
+        else if(v !== null && v !== undefined) el.setAttribute(k, v);
+      });
+    }
+    children.flat().forEach(c=>{
+      if(c === null || c === undefined) return;
+      if(typeof c === 'string' || typeof c === 'number') el.appendChild(document.createTextNode(c));
+      else el.appendChild(c);
+    });
+    return el;
+  }
+
+  function renderHome(){
+    const wrap = h('div', {class:'wrap'});
+    wrap.appendChild(h('h1', {class:'brand'}, '¿Quién ', h('span',null,'Soy'), '?'));
+    wrap.appendChild(h('p', {class:'tagline'}, 'El clásico juego de adivinar personajes con preguntas de sí y no — ahora para jugar a distancia.'));
+
+    if(!connected){
+      wrap.appendChild(h('div', {class:'conn-banner bad'}, 'Conectando al servidor…'));
+    }
+
+    const createCard = h('div', {class:'card'});
+    createCard.appendChild(h('label', null, 'Tu nombre'));
+    const nameInput = h('input', {type:'text', placeholder:'Ej: Feithan'});
+    createCard.appendChild(h('div',{class:'field'}, nameInput));
+    createCard.appendChild(h('button', {class:'btn-primary', disabled: busy?'true':null, onclick: ()=>{
+      const v = nameInput.value.trim();
+      if(!v){ toast('Escribe tu nombre primero'); return; }
+      createRoom(v);
+    }}, busy ? 'Creando…' : 'Crear una sala nueva'));
+    wrap.appendChild(createCard);
+
+    wrap.appendChild(h('div', {class:'divider'}, 'o'));
+
+    const joinCard = h('div', {class:'card'});
+    joinCard.appendChild(h('label', null, 'Código de sala'));
+    const codeInput = h('input', {type:'text', placeholder:'Ej: KX9P', maxlength:'6', style:'text-transform:uppercase;letter-spacing:2px'});
+    joinCard.appendChild(h('div',{class:'field'}, codeInput));
+    joinCard.appendChild(h('label', null, 'Tu nombre'));
+    const nameInput2 = h('input', {type:'text', placeholder:'Ej: Milovan'});
+    joinCard.appendChild(h('div',{class:'field'}, nameInput2));
+    joinCard.appendChild(h('button', {class:'btn-ghost', disabled: busy?'true':null, onclick: ()=>{
+      const c = codeInput.value.trim();
+      const n = nameInput2.value.trim();
+      if(!c || !n){ toast('Completa el código y tu nombre'); return; }
+      joinRoom(c, n);
+    }}, 'Unirme a una sala'));
+    if(joinErr) joinCard.appendChild(h('div', {class:'error'}, joinErr));
+    wrap.appendChild(joinCard);
+
+    wrap.appendChild(h('p', {class:'muted center'}, 'Cada jugador abre este mismo link desde su celular y entra con el código de sala.'));
+    return wrap;
+  }
+
+  function renderLobby(){
+    const wrap = h('div', {class:'wrap'});
+    wrap.appendChild(h('h1', {class:'brand', style:'font-size:26px'}, 'Sala de espera'));
+
+    const codeCard = h('div', {class:'card center'});
+    codeCard.appendChild(h('div', {class:'muted', style:'margin-bottom:10px'}, 'Comparte este código con tus amigos'));
+    codeCard.appendChild(h('div', {class:'code-pill'}, room.code));
+    wrap.appendChild(codeCard);
+
+    const playersCard = h('div', {class:'card'});
+    playersCard.appendChild(h('div', {class:'scoreboard-title'}, `Jugadores (${room.players.length})`));
+    const list = h('ul', {class:'players-list'});
+    room.players.forEach(p=>{
+      const li = h('li', null,
+        h('div', {class:'avatar'}, p.name.slice(0,2).toUpperCase()),
+        h('span', null, p.name + (p.id === myId ? ' (tú)' : '')),
+      );
+      if(p.id === room.hostId) li.appendChild(h('span', {class:'host-tag'}, 'Anfitrión'));
+      else if(p.connected === false) li.appendChild(h('span', {class:'offline-tag'}, 'desconectado'));
+      list.appendChild(li);
+    });
+    playersCard.appendChild(list);
+    wrap.appendChild(playersCard);
+
+    const isHost = myId === room.hostId;
+
+    const themeCard = h('div', {class:'card'});
+    themeCard.appendChild(h('div', {class:'scoreboard-title'}, isHost ? 'Elige la categoría' : 'Categoría elegida'));
+    const grid = h('div', {class:'theme-grid'});
+    Object.entries(THEME_META).forEach(([key, t])=>{
+      const opt = h('div', {
+        class: 'theme-opt' + (room.themeKey === key ? ' active' : ''),
+        onclick: isHost ? ()=> setTheme(key) : null
+      }, h('span', {class:'emoji'}, t.emoji), t.label);
+      if(!isHost) opt.style.cursor = 'default';
+      grid.appendChild(opt);
+    });
+    themeCard.appendChild(grid);
+
+    if(isHost){
+      themeCard.appendChild(h('label', null, 'Agregar tus propias palabras (separadas por coma)'));
+      const ta = h('textarea', {placeholder:'Ej: Profesor de POO, Milovan, Sala de clases INACAP'});
+      themeCard.appendChild(h('div',{class:'field'}, ta));
+      themeCard.appendChild(h('button', {class:'btn-ghost', onclick:()=>{
+        addCustomWords(ta.value);
+        ta.value = '';
+      }}, 'Agregar palabras'));
+      themeCard.appendChild(h('p', {class:'muted', style:'margin-top:10px'}, `${room.wordPool.length} palabras en la lista actual.`));
+    }
+    wrap.appendChild(themeCard);
+
+    if(isHost){
+      wrap.appendChild(h('button', {class:'btn-primary', onclick: startGame}, '¡Empezar a jugar!'));
+    } else {
+      wrap.appendChild(h('div', {class:'card center muted'}, h('span',{class:'spinner'}), 'Esperando a que el anfitrión empiece la partida…'));
+    }
+
+    wrap.appendChild(h('div', {class:'link-row'}, h('span', {class:'fake-a', onclick: leaveRoom}, 'Salir de la sala')));
+    return wrap;
+  }
+
+  function renderGame(){
+    const wrap = h('div', {class:'wrap'});
+    const isGuesser = myId === room.currentGuesserId;
+    const guesser = room.players.find(p=>p.id === room.currentGuesserId);
+
+    wrap.appendChild(h('h1', {class:'brand', style:'font-size:24px'}, '¿Quién ', h('span',null,'Soy'), '?'));
+    wrap.appendChild(h('div', {class:'turn-banner'}, 'Le toca adivinar a ', h('b', null, guesser ? (guesser.id===myId?'ti':guesser.name) : '—')));
+
+    const stage = h('div', {class: 'stage ' + (isGuesser ? 'hidden-role' : 'shown-role')});
+    if(isGuesser){
+      stage.appendChild(h('div', {class:'eyebrow'}, 'Es tu turno'));
+      stage.appendChild(h('div', {class:'word big-q'}, '?'));
+      stage.appendChild(h('div', {class:'hint'}, 'Hazle preguntas de sí/no a tus amigos para descubrir quién o qué eres.'));
+    } else {
+      stage.appendChild(h('div', {class:'eyebrow'}, guesser ? `${guesser.name} es…` : ''));
+      stage.appendChild(h('div', {class:'word'}, room.currentWord || ''));
+      stage.appendChild(h('div', {class:'hint'}, 'Muéstrale esta pantalla a todos menos a ' + (guesser ? guesser.name : 'quien adivina') + '.'));
+    }
+    wrap.appendChild(stage);
+
+    const controls = h('div', {class:'card controls-stack'});
+    if(!isGuesser){
+      controls.appendChild(h('button', {class:'btn-mint', onclick: correctGuess}, `${guesser ? guesser.name : 'Adivinó'} ¡acertó! 🎉`));
+      controls.appendChild(h('button', {class:'btn-ghost', onclick: passTurn}, 'Cambiar palabra (pasapalabra)'));
+    } else {
+      controls.appendChild(h('p', {class:'muted center'}, 'Pídele a los demás que toquen "acertó" cuando adivines, o "cambiar palabra" si se complica.'));
+    }
+    wrap.appendChild(controls);
+
+    const scoreCard = h('div', {class:'card'});
+    scoreCard.appendChild(h('div', {class:'scoreboard-title'}, 'Puntajes'));
+    const list = h('ul', {class:'players-list'});
+    room.players.slice().sort((a,b)=>b.score-a.score).forEach(p=>{
+      list.appendChild(h('li', null,
+        h('div', {class:'avatar'}, p.name.slice(0,2).toUpperCase()),
+        h('span', null, p.name + (p.id === myId ? ' (tú)' : '')),
+        h('span', {class:'score-tag'}, p.score + ' pts')
+      ));
+    });
+    scoreCard.appendChild(list);
+    wrap.appendChild(scoreCard);
+
+    if(myId === room.hostId){
+      wrap.appendChild(h('button', {class:'btn-danger', onclick: endGame}, 'Terminar partida'));
+    }
+    return wrap;
+  }
+
+  function render(){
+    app.innerHTML = '';
+    let node;
+    if(!room) node = renderHome();
+    else if(room.status === 'lobby') node = renderLobby();
+    else node = renderGame();
+    app.appendChild(node);
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
