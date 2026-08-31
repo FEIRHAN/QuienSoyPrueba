@@ -150,6 +150,53 @@
   @keyframes spin{ to{ transform: rotate(360deg); } }
   .conn-banner{ text-align:center; font-size:12.5px; color: var(--ink-dim); margin-bottom: 14px; }
   .conn-banner.bad{ color: var(--pink); }
+
+  .timer-wrap{
+    display:flex; align-items:center; gap:10px;
+    justify-content:center;
+    margin-bottom: 6px;
+  }
+  .timer-num{
+    font-family:'Fredoka',sans-serif;
+    font-weight:700;
+    font-size: 15px;
+    color: var(--ink-dim);
+    min-width: 30px;
+    text-align:right;
+  }
+  .timer-num.urgent{ color: var(--pink); }
+  .timer-track{
+    flex:1;
+    max-width: 220px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--bg-2);
+    overflow:hidden;
+  }
+  .timer-fill{
+    height:100%;
+    border-radius:999px;
+    background: var(--mint);
+    transition: width 1s linear, background .3s;
+  }
+  .timer-fill.urgent{ background: var(--pink); }
+
+  .target-row{
+    display:flex; align-items:center; gap: 10px;
+  }
+  .target-row input{ text-align:center; }
+
+  .winner-badge{
+    font-size: 46px;
+    margin-bottom: 6px;
+  }
+  .winner-name{
+    font-family:'Fredoka',sans-serif;
+    font-weight:700;
+    font-size: 26px;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
 </style>
 </head>
 <body>
@@ -159,6 +206,7 @@
 <script>
 (function(){
   const socket = io();
+  const TURN_MS = 90 * 1000; // must match server.js TURN_MS
 
   // Theme metadata (words themselves live server-side)
   let THEME_META = {};
@@ -264,10 +312,14 @@
     socket.emit('add-words', { code: room.code, text });
     toast('Palabras agregadas ✨');
   }
-  function startGame(){
+  function startGame(targetScore){
     if(myId !== room.hostId) return;
     if(room.players.length < 2){ toast('Necesitas al menos 2 jugadores'); return; }
-    socket.emit('start-game', { code: room.code });
+    socket.emit('start-game', { code: room.code, targetScore });
+  }
+  function playAgain(targetScore){
+    // Same as starting a fresh game with the same players/theme.
+    startGame(targetScore);
   }
   function correctGuess(){ socket.emit('correct-guess', { code: room.code }); }
   function passTurn(){ socket.emit('pass-turn', { code: room.code }); }
@@ -390,7 +442,14 @@
     wrap.appendChild(themeCard);
 
     if(isHost){
-      wrap.appendChild(h('button', {class:'btn-primary', onclick: startGame}, '¡Empezar a jugar!'));
+      const targetCard = h('div', {class:'card'});
+      targetCard.appendChild(h('label', null, 'Puntaje para ganar la partida'));
+      const targetInput = h('input', {type:'text', inputmode:'numeric', value: String(room.targetScore || 15), style:'text-align:center;max-width:120px'});
+      targetCard.appendChild(h('div', {class:'field target-row'}, targetInput));
+      targetCard.appendChild(h('p', {class:'muted'}, 'Cada turno dura 90 segundos: si nadie acierta a tiempo, pasa al siguiente jugador sin sumar puntos.'));
+      wrap.appendChild(targetCard);
+
+      wrap.appendChild(h('button', {class:'btn-primary', onclick: ()=> startGame(targetInput.value)}, '¡Empezar a jugar!'));
     } else {
       wrap.appendChild(h('div', {class:'card center muted'}, h('span',{class:'spinner'}), 'Esperando a que el anfitrión empiece la partida…'));
     }
@@ -405,7 +464,17 @@
     const guesser = room.players.find(p=>p.id === room.currentGuesserId);
 
     wrap.appendChild(h('h1', {class:'brand', style:'font-size:24px'}, '¿Quién ', h('span',null,'Soy'), '?'));
-    wrap.appendChild(h('div', {class:'turn-banner'}, 'Le toca adivinar a ', h('b', null, guesser ? (guesser.id===myId?'ti':guesser.name) : '—')));
+
+    const remainingMs = room.turnEndsAt ? Math.max(0, room.turnEndsAt - Date.now()) : TURN_MS;
+    const remainingSecs = Math.ceil(remainingMs / 1000);
+    const urgent = remainingSecs <= 15;
+    const pct = Math.max(0, Math.min(100, (remainingMs / TURN_MS) * 100));
+    wrap.appendChild(h('div', {class:'timer-wrap'},
+      h('div', {class:'timer-track'}, h('div', {id:'timer-fill', class:'timer-fill' + (urgent?' urgent':''), style:`width:${pct}%`})),
+      h('div', {id:'timer-num', class:'timer-num' + (urgent?' urgent':'')}, remainingSecs + 's')
+    ));
+
+    wrap.appendChild(h('div', {class:'turn-banner'}, 'Le toca adivinar a ', h('b', null, guesser ? (guesser.id===myId?'ti':guesser.name) : '—'), ' · meta: ' + room.targetScore + ' pts'));
 
     const stage = h('div', {class: 'stage ' + (isGuesser ? 'hidden-role' : 'shown-role')});
     if(isGuesser){
@@ -447,14 +516,76 @@
     return wrap;
   }
 
+  function renderFinished(){
+    const wrap = h('div', {class:'wrap'});
+    const winner = room.players.find(p => p.id === room.winnerId);
+    wrap.appendChild(h('h1', {class:'brand', style:'font-size:24px'}, '¿Quién ', h('span',null,'Soy'), '?'));
+
+    const card = h('div', {class:'card center'});
+    card.appendChild(h('div', {class:'winner-badge'}, '🏆'));
+    card.appendChild(h('div', {class:'muted'}, '¡Ganó la partida!'));
+    card.appendChild(h('div', {class:'winner-name'}, winner ? (winner.id===myId ? 'Tú (' + winner.name + ')' : winner.name) : '—'));
+    card.appendChild(h('div', {class:'muted'}, `Llegó a ${room.targetScore} puntos primero.`));
+    wrap.appendChild(card);
+
+    const scoreCard = h('div', {class:'card'});
+    scoreCard.appendChild(h('div', {class:'scoreboard-title'}, 'Puntajes finales'));
+    const list = h('ul', {class:'players-list'});
+    room.players.slice().sort((a,b)=>b.score-a.score).forEach(p=>{
+      list.appendChild(h('li', null,
+        h('div', {class:'avatar'}, p.name.slice(0,2).toUpperCase()),
+        h('span', null, p.name + (p.id === myId ? ' (tú)' : '')),
+        h('span', {class:'score-tag'}, p.score + ' pts')
+      ));
+    });
+    scoreCard.appendChild(list);
+    wrap.appendChild(scoreCard);
+
+    const isHost = myId === room.hostId;
+    if(isHost){
+      const targetCard = h('div', {class:'card'});
+      targetCard.appendChild(h('label', null, 'Puntaje para ganar la revancha'));
+      const targetInput = h('input', {type:'text', inputmode:'numeric', value: String(room.targetScore || 15), style:'text-align:center;max-width:120px'});
+      targetCard.appendChild(h('div', {class:'field target-row'}, targetInput));
+      wrap.appendChild(targetCard);
+      wrap.appendChild(h('button', {class:'btn-primary', onclick: ()=> playAgain(targetInput.value)}, 'Jugar de nuevo'));
+      wrap.appendChild(h('button', {class:'btn-ghost', style:'margin-top:10px', onclick: endGame}, 'Volver a la sala de espera'));
+    } else {
+      wrap.appendChild(h('div', {class:'card center muted'}, 'Esperando a que el anfitrión inicie la revancha…'));
+    }
+
+    return wrap;
+  }
+
   function render(){
     app.innerHTML = '';
     let node;
     if(!room) node = renderHome();
     else if(room.status === 'lobby') node = renderLobby();
+    else if(room.status === 'finished') node = renderFinished();
     else node = renderGame();
     app.appendChild(node);
   }
+
+  // Ticks the on-screen countdown every 250ms without a full re-render, so
+  // the timer moves smoothly between the periodic room-update broadcasts.
+  setInterval(()=>{
+    if(!room || room.status !== 'playing' || !room.turnEndsAt) return;
+    const remainingMs = Math.max(0, room.turnEndsAt - Date.now());
+    const secs = Math.ceil(remainingMs / 1000);
+    const urgent = secs <= 15;
+    const numEl = document.getElementById('timer-num');
+    const fillEl = document.getElementById('timer-fill');
+    if(numEl){
+      numEl.textContent = secs + 's';
+      numEl.classList.toggle('urgent', urgent);
+    }
+    if(fillEl){
+      const pct = Math.max(0, Math.min(100, (remainingMs / TURN_MS) * 100));
+      fillEl.style.width = pct + '%';
+      fillEl.classList.toggle('urgent', urgent);
+    }
+  }, 250);
 
   render();
 })();

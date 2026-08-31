@@ -47,6 +47,13 @@ const THEME_META = Object.fromEntries(
 // casual party game played in one sitting.
 const rooms = new Map();
 
+// setTimeout handles per room code — kept out of the room object since they
+// can't be serialized/sent to clients.
+const turnTimers = new Map();
+
+const TURN_MS = 90 * 1000;
+const DEFAULT_TARGET_SCORE = 15;
+
 function uid() {
   return Math.random().toString(36).slice(2, 9);
 }
@@ -69,6 +76,62 @@ function broadcast(code) {
   if (room) io.to(code).emit('room-update', room);
 }
 
+function clearTurnTimer(code) {
+  const handle = turnTimers.get(code);
+  if (handle) clearTimeout(handle);
+  turnTimers.delete(code);
+}
+
+// Starts (or restarts) the 90s countdown for whoever is currently guessing.
+// If it fires with nobody having confirmed a correct guess, the turn moves
+// to the next player automatically — no points awarded — so a round can
+// never be dragged out indefinitely.
+function scheduleTurnTimer(code) {
+  clearTurnTimer(code);
+  const room = rooms.get(code);
+  if (!room || room.status !== 'playing') return;
+  room.turnEndsAt = Date.now() + TURN_MS;
+  const handle = setTimeout(() => advanceGuesser(code, { scored: false }), TURN_MS);
+  turnTimers.set(code, handle);
+}
+
+// Moves the turn to the next player with a fresh word. `scored: true` also
+// awards the point to whoever was just guessing before rotating.
+function advanceGuesser(code, { scored }) {
+  const room = rooms.get(code);
+  if (!room || room.status !== 'playing') return;
+  const idx = room.players.findIndex(p => p.id === room.currentGuesserId);
+  if (idx < 0) return;
+
+  if (scored) {
+    room.players[idx].score += 1;
+    if (room.players[idx].score >= room.targetScore) {
+      finishGame(code, room.players[idx].id);
+      return;
+    }
+  }
+
+  const nextIdx = (idx + 1) % room.players.length;
+  room.currentGuesserId = room.players[nextIdx].id;
+  const word = pickNextWord(room);
+  room.usedWords.push(word);
+  room.currentWord = word;
+  room.turnCount += 1;
+  scheduleTurnTimer(code); // also broadcasts via the room-update after
+  broadcast(code);
+}
+
+function finishGame(code, winnerId) {
+  const room = rooms.get(code);
+  if (!room) return;
+  clearTurnTimer(code);
+  room.status = 'finished';
+  room.winnerId = winnerId;
+  room.currentWord = null;
+  room.currentGuesserId = null;
+  broadcast(code);
+}
+
 io.on('connection', (socket) => {
   socket.on('get-themes', (_data, cb) => {
     if (typeof cb === 'function') cb(THEME_META);
@@ -88,7 +151,10 @@ io.on('connection', (socket) => {
       status: 'lobby',
       currentGuesserId: null,
       currentWord: null,
-      turnCount: 0
+      turnCount: 0,
+      targetScore: DEFAULT_TARGET_SCORE,
+      turnEndsAt: null,
+      winnerId: null
     };
     rooms.set(code, room);
     socket.join(code);
@@ -141,10 +207,15 @@ io.on('connection', (socket) => {
     broadcast(code);
   });
 
-  socket.on('start-game', ({ code }) => {
+  socket.on('start-game', ({ code, targetScore }) => {
     const room = rooms.get(code);
     if (!room || socket.data.playerId !== room.hostId) return;
     if (room.players.length < 2) return;
+    const parsed = parseInt(targetScore, 10);
+    room.targetScore = (Number.isFinite(parsed) && parsed > 0) ? Math.min(parsed, 999) : DEFAULT_TARGET_SCORE;
+    room.players.forEach(p => (p.score = 0));
+    room.usedWords = [];
+    room.winnerId = null;
     const guesser = room.players[0];
     const word = pickNextWord(room);
     room.usedWords.push(word);
@@ -152,25 +223,18 @@ io.on('connection', (socket) => {
     room.currentGuesserId = guesser.id;
     room.status = 'playing';
     room.turnCount = 1;
+    scheduleTurnTimer(code);
     broadcast(code);
   });
 
+  // Anyone in the room can confirm a correct guess (not just the host).
   socket.on('correct-guess', ({ code }) => {
-    const room = rooms.get(code);
-    if (!room || room.status !== 'playing') return;
-    const idx = room.players.findIndex(p => p.id === room.currentGuesserId);
-    if (idx < 0) return;
-    room.players[idx].score += 1;
-    const nextIdx = (idx + 1) % room.players.length;
-    room.currentGuesserId = room.players[nextIdx].id;
-    const word = pickNextWord(room);
-    room.usedWords.push(word);
-    room.currentWord = word;
-    room.turnCount += 1;
-    broadcast(code);
+    advanceGuesser(code, { scored: true });
   });
 
   socket.on('pass-turn', ({ code }) => {
+    // Gives up on the current word only — same guesser, same countdown,
+    // just a new word to try. Doesn't rotate the turn or reset the timer.
     const room = rooms.get(code);
     if (!room || room.status !== 'playing') return;
     const word = pickNextWord(room);
@@ -183,9 +247,12 @@ io.on('connection', (socket) => {
   socket.on('end-game', ({ code }) => {
     const room = rooms.get(code);
     if (!room || socket.data.playerId !== room.hostId) return;
+    clearTurnTimer(code);
     room.status = 'lobby';
     room.currentWord = null;
     room.currentGuesserId = null;
+    room.turnEndsAt = null;
+    room.winnerId = null;
     room.players.forEach(p => (p.score = 0));
     room.usedWords = [];
     broadcast(code);
