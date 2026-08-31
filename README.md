@@ -14,6 +14,28 @@ npm start
 Abre http://localhost:3000 en el navegador (o en varias pestañas/celulares
 en la misma red, cambiando localhost por la IP de tu computador).
 
+## Categorías generadas con IA
+
+El anfitrión puede escribir cualquier tema en el lobby ("Crear categoría con
+IA") y el servidor le pide a un modelo de IA que genere ~24 palabras para
+esa categoría. Usa **Groq**, que da API keys gratis sin pedir tarjeta de
+crédito ni facturación:
+
+1. Crea una cuenta gratis en https://console.groq.com (solo correo).
+2. Ve a **API Keys** → **Create API Key** y cópiala.
+3. En Render, ve a tu Web Service → **Environment** → agrega una variable:
+   - **Key**: `GROQ_API_KEY`
+   - **Value**: tu API key (empieza con `gsk_...`)
+4. Guarda y Render redesplegará automáticamente con la variable disponible.
+
+Si no configuras esta variable, el botón de "Generar categoría" seguirá
+visible pero mostrará un aviso pidiendo configurarla — el resto del juego
+(categorías fijas) funciona igual sin ella.
+
+Groq tiene un límite de uso gratis (peticiones por minuto/día) más que
+suficiente para jugar con amigos. Hay además un enfriamiento de 8 segundos
+entre generaciones por sala para evitar spam accidental.
+
 ## Cómo desplegarlo en Render
 
 1. Sube esta carpeta a un repositorio de GitHub.

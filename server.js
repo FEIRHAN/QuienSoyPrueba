@@ -13,27 +13,35 @@ app.use(express.static(path.join(__dirname, 'public')));
 const THEMES = {
   famosos: {
     label: 'Personajes famosos', emoji: '🌟',
-    words: ['Lionel Messi','Shakira','Karol G','Cristiano Ronaldo','Beyoncé','Bad Bunny','Rihanna','Leonardo DiCaprio','Taylor Swift','Don Francisco','Arturo Vidal','Mon Laferte','Freddie Mercury','Michael Jackson','Marilyn Monroe','Albert Einstein','Frida Kahlo','Pablo Neruda','Gabriela Mistral','Charly García']
+    words: ['Lionel Messi','Shakira','Karol G','Cristiano Ronaldo','Beyoncé','Bad Bunny','Rihanna','Leonardo DiCaprio','Taylor Swift','Don Francisco','Arturo Vidal','Mon Laferte','Freddie Mercury','Michael Jackson','Marilyn Monroe','Albert Einstein','Frida Kahlo','Pablo Neruda','Gabriela Mistral','Charly García','Alexis Sánchez','Claudio Bravo','Myriam Hernández','Américo','Daddy Yankee','Selena Gomez','Dua Lipa','Ed Sheeran','Will Smith','Dwayne Johnson','Emma Watson','Tom Cruise','Elon Musk','Adele','Billie Eilish','Barack Obama','Nelson Mandela']
   },
   peliculas: {
     label: 'Películas y series', emoji: '🎬',
-    words: ['Titanic','Harry Potter','El Padrino','Toy Story','Stranger Things','La Casa de Papel','Shrek','Star Wars','Los Simpsons','Friends','Coco','El Rey León','Breaking Bad','Matrix','Jurassic Park','Frozen','Avatar','Los Vengadores','El Chavo del Ocho','Élite']
+    words: ['Titanic','Harry Potter','El Padrino','Toy Story','Stranger Things','La Casa de Papel','Shrek','Star Wars','Los Simpsons','Friends','Coco','El Rey León','Breaking Bad','Matrix','Jurassic Park','Frozen','Avatar','Los Vengadores','El Chavo del Ocho','Élite','Interstellar','El Señor de los Anillos','Piratas del Caribe','Joker','Spider-Man','Batman','Wednesday','The Office','Peaky Blinders','Narcos','Black Mirror','Coraline','Up','Inside Out','Encanto','La La Land','Parásitos','Squid Game']
   },
   animales: {
     label: 'Animales', emoji: '🐨',
-    words: ['León','Pingüino','Cóndor','Pulpo','Canguro','Jirafa','Tiburón','Murciélago','Camaleón','Elefante','Panda','Zorro','Delfín','Búho','Guanaco','Flamenco','Erizo','Koala','Avestruz','Cocodrilo']
+    words: ['León','Pingüino','Cóndor','Pulpo','Canguro','Jirafa','Tiburón','Murciélago','Camaleón','Elefante','Panda','Zorro','Delfín','Búho','Guanaco','Flamenco','Erizo','Koala','Avestruz','Cocodrilo','Rinoceronte','Hipopótamo','Oso polar','Lobo','Águila','Serpiente','Mono','Foca','Cebra','Puma','Chinchilla','Vicuña']
   },
   profesiones: {
     label: 'Profesiones', emoji: '🛠️',
-    words: ['Bombero','Astronauta','Chef','Dentista','Piloto de avión','Youtuber','Arquitecto/a','Enfermero/a','Programador/a','Profesor/a','Detective','Peluquero/a','Veterinario/a','Futbolista','Actor/actriz','Fotógrafo/a','Panadero/a','Buzo','Ingeniero/a','Mecánico/a']
+    words: ['Bombero','Astronauta','Chef','Dentista','Piloto de avión','Youtuber','Arquitecto/a','Enfermero/a','Programador/a','Profesor/a','Detective','Peluquero/a','Veterinario/a','Futbolista','Actor/actriz','Fotógrafo/a','Panadero/a','Buzo','Ingeniero/a','Mecánico/a','Abogado/a','Psicólogo/a','Piloto de carreras','Diseñador/a gráfico/a','DJ','Barista','Guía turístico/a','Bibliotecario/a']
   },
   objetos: {
     label: 'Objetos cotidianos', emoji: '🧦',
-    words: ['Paraguas','Microondas','Mochila','Bicicleta','Guitarra','Espejo','Cepillo de dientes','Reloj','Silla','Termo','Lentes de sol','Control remoto','Almohada','Maleta','Bufanda','Linterna','Escoba','Cámara','Cargador','Sombrilla']
+    words: ['Paraguas','Microondas','Mochila','Bicicleta','Guitarra','Espejo','Cepillo de dientes','Reloj','Silla','Termo','Lentes de sol','Control remoto','Almohada','Maleta','Bufanda','Linterna','Escoba','Cámara','Cargador','Sombrilla','Audífonos','Cortaúñas','Plancha','Batería externa','Mouse','Teclado','Tetera','Sacapuntas']
   },
-  dibujos: {
-    label: 'Dibujos y anime', emoji: '👾',
-    words: ['Goku','Pikachu','Mickey Mouse','Bob Esponja','Naruto','Doraemon','Mario Bros','Sonic','Bugs Bunny','Homero Simpson','Totoro','Luffy','Popeye','Piolín','Scooby-Doo','El Chapulín Colorado','Kirby','Winnie Pooh','Tom y Jerry','Shin Chan']
+  anime: {
+    label: 'Anime', emoji: '🍥',
+    words: ['Naruto Uzumaki','Goku','Luffy','Sasuke Uchiha','Ichigo Kurosaki','Levi Ackerman','Eren Jaeger','Mikasa Ackerman','Deku','All Might','Saitama','Light Yagami','L','Edward Elric','Natsu Dragneel','Gon Freecss','Killua Zoldyck','Tanjiro Kamado','Nezuko Kamado','Zoro','Nami','Vegeta','Sailor Moon','Doraemon','Shin Chan','Totoro','Chopper','Rem','Anya Forger','Gojo Satoru']
+  },
+  dibujo_animado: {
+    label: 'Dibujo animado', emoji: '🐭',
+    words: ['Mickey Mouse','Bob Esponja','Homero Simpson','Bugs Bunny','Piolín','Tom y Jerry','Scooby-Doo','El Chapulín Colorado','Winnie Pooh','Popeye','Los Picapiedra','Pato Donald','Peter Griffin','Stewie Griffin','Rick Sanchez','Morty Smith','Las Chicas Superpoderosas','Ben 10','Phineas y Ferb','Bob Patiño','Patricio Estrella','Marge Simpson','El Coyote y el Correcaminos','Dexter','Timmy Turner','Garfield','Hora de Aventura']
+  },
+  videojuegos: {
+    label: 'Videojuegos', emoji: '🎮',
+    words: ['Mario Bros','Sonic','Kirby','Link','Pac-Man','Master Chief','Lara Croft','Kratos','Steve (Minecraft)','Among Us','Sans','Cuphead','Crash Bandicoot','Spyro','Ryu','Chun-Li','Geralt de Rivia','Pikachu','Charizard','Mega Man','Donkey Kong','Yoshi','Bowser','Zelda','Samus Aran','Ezio Auditore','Solid Snake','GLaDOS','Freddy Fazbear','Peach']
   }
 };
 
@@ -53,6 +61,10 @@ const turnTimers = new Map();
 
 const TURN_MS = 90 * 1000;
 const DEFAULT_TARGET_SCORE = 15;
+// Groq gives out free API keys with no billing/credit card required, and
+// serves open models (Llama) fast — good fit for this small JSON task.
+const AI_MODEL = 'llama-3.3-70b-versatile';
+const AI_COOLDOWN_MS = 8 * 1000; // avoid spamming the API from one room
 
 function uid() {
   return Math.random().toString(36).slice(2, 9);
@@ -132,6 +144,55 @@ function finishGame(code, winnerId) {
   broadcast(code);
 }
 
+// Asks Groq (free API, no billing required) for a fresh word list on any
+// topic the host types in. Returns a clean array of short strings, or
+// throws if the API/JSON parsing fails.
+async function generateThemeWords(topic) {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: AI_MODEL,
+      temperature: 0.9,
+      response_format: { type: 'json_object' },
+      messages: [
+        {
+          role: 'system',
+          content: 'Respondes únicamente con un objeto JSON válido, sin texto adicional, sin markdown ni backticks.'
+        },
+        {
+          role: 'user',
+          content: `Genera una lista de 24 elementos para jugar a "¿Quién soy?" ` +
+            `(adivinar con preguntas de sí/no) sobre este tema: "${topic}".\n\n` +
+            `Reglas:\n` +
+            `- Cada elemento debe ser un personaje, persona, objeto o cosa concreta y reconocible relacionada con el tema, no un concepto abstracto.\n` +
+            `- Máximo 4 palabras por elemento.\n` +
+            `- No repitas elementos.\n` +
+            `- Nada violento, sexual, de odio ni inapropiado para todo público. Si el tema en sí es inapropiado o poco claro, responde con una lista vacía.\n` +
+            `- Responde con un objeto JSON con esta forma exacta: {"words": ["Elemento 1", "Elemento 2", ...]}`
+        }
+      ]
+    })
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    throw new Error(`Groq API ${res.status}: ${errText.slice(0, 200)}`);
+  }
+
+  const data = await res.json();
+  const content = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  if (!content) throw new Error('Respuesta sin contenido');
+
+  const parsed = JSON.parse(content);
+  const words = Array.isArray(parsed.words) ? parsed.words : (Array.isArray(parsed) ? parsed : null);
+  if (!words) throw new Error('Formato inesperado');
+  return words.map(w => String(w).trim()).filter(Boolean).slice(0, 40);
+}
+
 io.on('connection', (socket) => {
   socket.on('get-themes', (_data, cb) => {
     if (typeof cb === 'function') cb(THEME_META);
@@ -154,7 +215,9 @@ io.on('connection', (socket) => {
       turnCount: 0,
       targetScore: DEFAULT_TARGET_SCORE,
       turnEndsAt: null,
-      winnerId: null
+      winnerId: null,
+      customLabel: null,
+      aiGenerating: false
     };
     rooms.set(code, room);
     socket.join(code);
@@ -196,7 +259,46 @@ io.on('connection', (socket) => {
     room.themeKey = themeKey;
     room.wordPool = THEMES[themeKey].words.slice();
     room.usedWords = [];
+    room.customLabel = null;
     broadcast(code);
+  });
+
+  socket.on('generate-ai-theme', async ({ code, topic }, cb) => {
+    const reply = (payload) => { if (typeof cb === 'function') cb(payload); };
+    const room = rooms.get(code);
+    if (!room) return reply({ ok: false, error: 'Sala no encontrada.' });
+    if (socket.data.playerId !== room.hostId) return reply({ ok: false, error: 'Solo el anfitrión puede generar categorías.' });
+    const cleanTopic = (topic || '').trim().slice(0, 80);
+    if (!cleanTopic) return reply({ ok: false, error: 'Escribe un tema primero.' });
+    if (!process.env.GROQ_API_KEY) {
+      return reply({ ok: false, error: 'Falta configurar GROQ_API_KEY en el servidor (variable de entorno en Render).' });
+    }
+    const lastAt = room.lastAiRequestAt || 0;
+    if (Date.now() - lastAt < AI_COOLDOWN_MS) {
+      return reply({ ok: false, error: 'Espera unos segundos antes de generar otra categoría.' });
+    }
+    room.lastAiRequestAt = Date.now();
+    room.aiGenerating = true;
+    broadcast(code);
+    try {
+      const words = await generateThemeWords(cleanTopic);
+      room.aiGenerating = false;
+      if (!words || words.length < 8) {
+        broadcast(code);
+        return reply({ ok: false, error: 'No se pudo generar esa categoría (puede ser un tema poco claro o sensible). Prueba con otro.' });
+      }
+      room.themeKey = 'custom';
+      room.customLabel = cleanTopic;
+      room.wordPool = words;
+      room.usedWords = [];
+      broadcast(code);
+      reply({ ok: true });
+    } catch (err) {
+      room.aiGenerating = false;
+      broadcast(code);
+      console.error('AI theme generation failed:', err.message);
+      reply({ ok: false, error: 'Error generando la categoría. Intenta de nuevo.' });
+    }
   });
 
   socket.on('add-words', ({ code, text }) => {

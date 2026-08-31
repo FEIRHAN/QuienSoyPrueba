@@ -418,6 +418,10 @@
 
     const themeCard = h('div', {class:'card'});
     themeCard.appendChild(h('div', {class:'scoreboard-title'}, isHost ? 'Elige la categoría' : 'Categoría elegida'));
+    const currentLabel = room.themeKey === 'custom' && room.customLabel
+      ? ('✨ ' + room.customLabel)
+      : (THEME_META[room.themeKey] ? THEME_META[room.themeKey].label : room.themeKey);
+    themeCard.appendChild(h('p', {class:'muted', style:'margin:-2px 0 12px'}, 'Actual: ' + currentLabel));
     const grid = h('div', {class:'theme-grid'});
     Object.entries(THEME_META).forEach(([key, t])=>{
       const opt = h('div', {
@@ -440,6 +444,28 @@
       themeCard.appendChild(h('p', {class:'muted', style:'margin-top:10px'}, `${room.wordPool.length} palabras en la lista actual.`));
     }
     wrap.appendChild(themeCard);
+
+    if(isHost){
+      const aiCard = h('div', {class:'card'});
+      aiCard.appendChild(h('div', {class:'scoreboard-title'}, '✨ Crear categoría con IA'));
+      aiCard.appendChild(h('label', null, '¿Sobre qué tema?'));
+      const topicInput = h('input', {type:'text', placeholder:'Ej: Rápido y Furioso, marcas de bebidas, el universo Marvel…'});
+      aiCard.appendChild(h('div', {class:'field'}, topicInput));
+      const genBtn = h('button', {class:'btn-gold', disabled: room.aiGenerating ? 'true' : null, onclick: ()=>{
+        const topic = topicInput.value.trim();
+        if(!topic){ toast('Escribe un tema primero'); return; }
+        socket.emit('generate-ai-theme', { code: room.code, topic }, (res)=>{
+          if(!res || !res.ok){
+            toast((res && res.error) || 'No se pudo generar la categoría');
+          } else {
+            toast('¡Categoría generada! 🎉');
+            topicInput.value = '';
+          }
+        });
+      }}, room.aiGenerating ? 'Generando…' : 'Generar categoría');
+      aiCard.appendChild(genBtn);
+      wrap.appendChild(aiCard);
+    }
 
     if(isHost){
       const targetCard = h('div', {class:'card'});
