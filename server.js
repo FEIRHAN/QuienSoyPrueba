@@ -62,8 +62,10 @@ const turnTimers = new Map();
 const TURN_MS = 90 * 1000;
 const DEFAULT_TARGET_SCORE = 15;
 // Groq gives out free API keys with no billing/credit card required, and
-// serves open models (Llama) fast — good fit for this small JSON task.
-const AI_MODEL = 'llama-3.3-70b-versatile';
+// serves open models fast — good fit for this small JSON task.
+// NOTE: llama-3.3-70b-versatile was deprecated by Groq in June 2026 for
+// free/developer tier — using their recommended replacement instead.
+const AI_MODEL = 'openai/gpt-oss-120b';
 const AI_COOLDOWN_MS = 8 * 1000; // avoid spamming the API from one room
 
 function uid() {
@@ -297,7 +299,7 @@ io.on('connection', (socket) => {
       room.aiGenerating = false;
       broadcast(code);
       console.error('AI theme generation failed:', err.message);
-      reply({ ok: false, error: 'Error generando la categoría. Intenta de nuevo.' });
+      reply({ ok: false, error: `Error generando la categoría: ${err.message.slice(0, 160)}` });
     }
   });
 
